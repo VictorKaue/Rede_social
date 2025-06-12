@@ -1,4 +1,4 @@
-# 🌐 Rede Social JPProject
+# 🌐 Rede Social Projeto
 
 Olá! Seja bem-vindo ao projeto da nossa rede social. Aqui você vai encontrar um espaço onde todo mundo pode se conectar e compartilhar experiências de forma livre e transparente.
 
