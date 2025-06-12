@@ -102,6 +102,4 @@ Fique à vontade para:
 
 Queremos criar um espaço onde todo mundo possa se conectar e compartilhar de forma livre e transparente. Um lugar onde as conexões são verdadeiras e as barreiras não existem.
 
----
-
-Feito com ❤️ pela equipe JPProject 
+--- 
