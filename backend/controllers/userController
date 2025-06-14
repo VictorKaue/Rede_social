@@ -1,0 +1,60 @@
+const db = require('../config/connection');
+
+async function getTodosUsuarios(req, res) {
+    try {
+        const [linhas] = await db.query('SELECT * FROM usuario');
+        res.json(linhas);
+    } catch (erro) {
+        res.status(500).json({ erro: 'Erro ao buscar usuários' });
+    }
+};
+
+async function getUsuarioPeloId(req, res) {
+    const id = req.params.id
+    try {
+        const [linhas] = await db.query('SELECT * FROM usuario WHERE id ?', [id]);
+        if (linhas.lenth === 0) {
+            return res.status(404).json({ mensagem: 'Usuário não encontrado' });
+        }
+        res.json(linhas[0])
+    } catch (erro) {
+        res.status(500).json({ erro: 'Erro ao buscar usuário' });
+    }
+}
+
+async function atualizarUsuario(req, res) {
+    const id = req.params.id;
+    const { nome, email, data_nascimento, foto_perfil } = req.body;
+    try {
+        const [resultado] = await db.query(
+            'UPDATE usuario SET nome = ?, email = ?, data_nascimento = ?, foto_perfil = ? WHERE id = ?',
+            [nome, email, data_nascimento, foto_perfil, id]
+        );
+        if (resultado.affectedRows === 0) {
+            return res.status(404).json({ mensagem: 'Usuário não encontrado' });
+        }
+        res.json({ mensagem: 'Usuário atualizado com sucesso' });
+    } catch (erro) {
+        res.status(500).json({ erro: 'Erro ao atualizar usuário' });
+    }
+}
+
+async function cadastrarUsuario(req, res) {
+    const { nome, email, data_nascimento, foto_perfil } = req.body;
+    try {
+        const [resultado] = await db.query(
+            'INSERT INTO usuario (nome, email, data_nascimento, foto_perfil) VALUES (?, ?, ?, ?)',
+            [nome, email, data_nascimento, foto_perfil]
+        );
+        res.status(201).json({ id: resultado.insertId, mensagem: 'Usuário criado com sucesso' });
+    } catch (erro) {
+        res.status(500).json({ erro: 'Erro ao criar usuário' });
+    }
+}
+
+module.exports = {
+    getTodosUsuarios,
+    getUsuarioPeloId,
+    atualizarUsuario,
+    cadastrarUsuario
+}
