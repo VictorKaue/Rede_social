@@ -20,6 +20,7 @@
  */
 
 import { User, UpdateProfileForm, Message, SendMessageForm } from '../types';
+import api from './api';
 
 // ============================================================================
 // DADOS MOCKADOS PARA DESENVOLVIMENTO
@@ -451,6 +452,60 @@ export const userService = {
 
     return filtered.slice(0, 10); // Limitar resultados para performance
   },
+
+  /**
+   * OBTER CONTAGEM DE SEGUIDORES
+   * 
+   * Obtém a contagem de seguidores de um usuário.
+   * 
+   * @param userId - ID do usuário
+   * @returns Promise<number> - Contagem de seguidores
+   * 
+   * BACKEND TODO:
+   * - Endpoint: GET /api/usuario/:userId/followers/count
+   * - Query otimizada para contagem
+   * - Cache Redis para contagens (TTL: 5 minutos)
+   */
+  async getFollowerCount(userId: number): Promise<number> {
+    const response = await api.get(`/api/usuario/${userId}/followers/count`);
+    return response.data;
+  },
+
+  /**
+   * OBTER CONTAGEM DE SEGUINDO
+   * 
+   * Obtém a contagem de usuários que um usuário está seguindo.
+   * 
+   * @param userId - ID do usuário
+   * @returns Promise<number> - Contagem de seguindo
+   * 
+   * BACKEND TODO:
+   * - Endpoint: GET /api/usuario/:userId/following/count
+   * - Query otimizada para contagem
+   * - Cache Redis para contagens (TTL: 5 minutos)
+   */
+  async getFollowingCount(userId: number): Promise<number> {
+    const response = await api.get(`/api/usuario/${userId}/following/count`);
+    return response.data;
+  },
+
+  /**
+   * OBTER CONTAGEM DE POSTS
+   * 
+   * Obtém a contagem de posts de um usuário.
+   * 
+   * @param userId - ID do usuário
+   * @returns Promise<number> - Contagem de posts
+   * 
+   * BACKEND TODO:
+   * - Endpoint: GET /api/usuario/:userId/posts/count
+   * - Query otimizada para contagem
+   * - Cache Redis para contagens (TTL: 5 minutos)
+   */
+  async getPostCount(userId: number): Promise<number> {
+    const response = await api.get(`/api/usuario/${userId}/posts/count`);
+    return response.data;
+  },
 };
 
 // ============================================================================
@@ -507,4 +562,4 @@ export const userService = {
  * - Sanitização de entrada (prevenir XSS)
  * - Rate limiting rigoroso para busca e mensagens
  * - Logs de auditoria para ações sensíveis
- */ 
+ */

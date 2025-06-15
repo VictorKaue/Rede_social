@@ -40,6 +40,7 @@ import {
 } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 import { Post } from '../types';
+import api from '../services/api';
 
 // =============================================================================
 // COMPONENTES IMPORTADOS
@@ -96,6 +97,12 @@ const HomePage: React.FC = () => {
    */
   const [createPostOpen, setCreatePostOpen] = useState(false);
 
+  /**
+   * Estado de erro para exibição de mensagens amigáveis
+   * em caso de falhas na requisição de posts
+   */
+  const [error, setError] = useState<string | null>(null);
+
   // =============================================================================
   // EFEITOS E CARREGAMENTO DE DADOS
   // =============================================================================
@@ -114,72 +121,21 @@ const HomePage: React.FC = () => {
    * TODO: Implementar personalização baseada em algoritmo ML
    */
   useEffect(() => {
-    // TODO: SUBSTITUIR POR CHAMADA AO BACKEND - Buscar posts da timeline
-    // Endpoint sugerido: GET /api/posts/timeline?limit=10&offset=0
-    // Headers: Authorization: Bearer <token>
-    // Query params: limit, offset, filter_type (all|following|groups)
-    
-    const mockPosts: Post[] = [
-      {
-        post_id: 1, // TODO: BACKEND - ID real do post
-        user_id: 1, // TODO: BACKEND - ID real do usuário
-        content: 'Bem-vindos à nossa rede social aberta! 🌟 Aqui todos os perfis são públicos e as conexões são livres. Vamos construir uma comunidade incrível juntos!', // TODO: BACKEND - Conteúdo real do post
-        post_type: 'texto', // TODO: BACKEND - Tipo real do post (texto|imagem|video|link)
-        created_at: '2024-12-19T10:30:00Z', // TODO: BACKEND - Data real de criação
-        updated_at: '2024-12-19T10:30:00Z', // TODO: BACKEND - Data real de atualização
-        username: 'joao_silva', // TODO: BACKEND - Username real (vem do JOIN com users)
-        profile_photo: null, // TODO: BACKEND - Foto real do usuário (vem do JOIN com users)
-        like_count: 15, // TODO: BACKEND - Contagem real de likes (calculada)
-        dislike_count: 0, // TODO: BACKEND - Contagem real de dislikes (calculada)
-        comment_count: 8, // TODO: BACKEND - Contagem real de comentários (calculada)
-      },
-      {
-        post_id: 2, // TODO: BACKEND - ID sequencial ou UUID
-        user_id: 2, // TODO: BACKEND - FK para tabela users
-        content: 'Acabei de me juntar à rede! Estou animada para conhecer pessoas novas e compartilhar experiências. Quem mais é apaixonado por tecnologia? 💻', // TODO: BACKEND - Texto com validação de tamanho
-        post_type: 'texto', // TODO: BACKEND - ENUM (texto, imagem, video, link)
-        created_at: '2024-12-19T09:15:00Z', // TODO: BACKEND - DATETIME com timezone
-        updated_at: '2024-12-19T09:15:00Z', // TODO: BACKEND - DATETIME atualizado em edições
-        username: 'maria_tech', // TODO: BACKEND - Vem do JOIN (SELECT u.username FROM users u WHERE u.user_id = p.user_id)
-        profile_photo: null, // TODO: BACKEND - URL da imagem ou NULL
-        like_count: 12, // TODO: BACKEND - COUNT dos registros na tabela post_reactions
-        dislike_count: 1, // TODO: BACKEND - COUNT WHERE reaction_type = 'dislike'
-        comment_count: 5, // TODO: BACKEND - COUNT dos registros na tabela comments
-      },
-      {
-        post_id: 3, // TODO: BACKEND - Chave primária autoincrement
-        user_id: 3, // TODO: BACKEND - ID do autor do post
-        content: 'Que tal criarmos um grupo para discutir as últimas tendências em desenvolvimento web? React, Vue, Angular... vamos compartilhar conhecimento! 🚀', // TODO: BACKEND - Conteúdo com possível detecção de hashtags
-        post_type: 'texto', // TODO: BACKEND - Tipo do post para renderização adequada
-        created_at: '2024-12-19T08:45:00Z', // TODO: BACKEND - Timestamp de criação
-        updated_at: '2024-12-19T08:45:00Z', // TODO: BACKEND - Timestamp de última modificação
-        username: 'dev_carlos', // TODO: BACKEND - Username para exibição (cached do JOIN)
-        profile_photo: null, // TODO: BACKEND - Avatar do usuário para exibição
-        like_count: 23, // TODO: BACKEND - Contador agregado de reações positivas
-        dislike_count: 2, // TODO: BACKEND - Contador agregado de reações negativas
-        comment_count: 12, // TODO: BACKEND - Contador de comentários para exibição
-      },
-    ];
+    const fetchPosts = async () => {
+      try {
+        const token = localStorage.getItem('authToken');
+        const response = await api.get('/posts/timeline', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setPosts(response.data.posts);
+      } catch (error) {
+        console.error('Erro ao carregar posts:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    // TODO: REMOVER SIMULAÇÃO DE CARREGAMENTO - Substituir por loading real das chamadas API
-    // Implementação real seria:
-    // try {
-    //   const response = await fetch('/api/posts/timeline', {
-    //     headers: { 'Authorization': `Bearer ${token}` }
-    //   });
-    //   const data = await response.json();
-    //   setPosts(data.posts);
-    // } catch (error) {
-    //   // Tratamento de erro
-    // } finally {
-    //   setLoading(false);
-    // }
-    
-    // Simular carregamento para demonstração
-    setTimeout(() => {
-      setPosts(mockPosts);
-      setLoading(false);
-    }, 1000);
+    fetchPosts();
   }, []);
 
   // =============================================================================
@@ -251,11 +207,9 @@ const HomePage: React.FC = () => {
    */
   const renderLoadingSkeleton = () => (
     <Box sx={{ display: 'flex', gap: 1 }}>
-      {/* Skeleton da timeline principal */}
       <Box sx={{ flex: '1 1 66%' }}>
-        {[1, 2, 3].map((i) => (
+        {[...Array(3)].map((_, i) => (
           <Card key={i} sx={{ mb: 3, p: 3 }}>
-            {/* Header do post (avatar + info do usuário) */}
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
               <Skeleton variant="circular" width={48} height={48} sx={{ mr: 2 }} />
               <Box sx={{ flex: 1 }}>
@@ -263,30 +217,12 @@ const HomePage: React.FC = () => {
                 <Skeleton variant="text" width="25%" height={16} />
               </Box>
             </Box>
-            
-            {/* Conteúdo do post */}
             <Skeleton variant="text" width="100%" height={20} />
             <Skeleton variant="text" width="80%" height={20} />
             <Skeleton variant="text" width="60%" height={20} sx={{ mb: 2 }} />
-            
-            {/* Botões de ação */}
-            <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-              {[1, 2, 3].map((j) => (
-                <Skeleton key={j} variant="rectangular" width={80} height={32} sx={{ borderRadius: 1 }} />
-              ))}
-            </Box>
           </Card>
         ))}
       </Box>
-      
-      {/* Skeleton da sidebar (apenas desktop) */}
-      {!isMobile && (
-        <Box sx={{ flex: '1 1 33%' }}>
-          <Card sx={{ p: 3 }}>
-            <Skeleton variant="rectangular" width="100%" height={200} sx={{ borderRadius: 1 }} />
-          </Card>
-        </Box>
-      )}
     </Box>
   );
 
@@ -473,4 +409,4 @@ export default HomePage;
  * - [ ] Métricas de engajamento por tipo de post
  * - [ ] A/B testing para algoritmos de feed
  * - [ ] Insights de uso para o próprio usuário
- */ 
+ */
