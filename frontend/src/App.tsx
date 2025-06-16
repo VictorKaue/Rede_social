@@ -8,6 +8,7 @@ import HomePage from './pages/HomePage';
 import ProfilePage from './pages/ProfilePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import GroupsPage from './pages/GroupsPage';
 import theme from './theme';
 
 const drawerWidth = 280; // Largura da sidebar
@@ -45,6 +46,7 @@ function App() {
               <Route path="/profile/:username" element={<ProfilePage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/home" element={<HomePage />} />
+              <Route path="/groups" element={<GroupsPage />} />
             </Routes>
           </main>
         </div>

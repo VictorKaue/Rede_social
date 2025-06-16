@@ -59,62 +59,27 @@ const GroupsPage: React.FC = () => {
   const [allGroups, setAllGroups] = useState<Group[]>([]);
   const [myGroups, setMyGroups] = useState<Group[]>([]);
   const [popularGroups, setPopularGroups] = useState<Group[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
   const [newGroupDescription, setNewGroupDescription] = useState('');
 
-  // Mock data - será substituído por chamadas à API
   useEffect(() => {
-    // TODO: SUBSTITUIR POR CHAMADA AO BACKEND - Buscar todos os grupos
-    // Endpoint sugerido: GET /api/groups?limit=20&offset=0
-    const mockAllGroups: Group[] = [
-      {
-        group_id: 1, // TODO: BACKEND - ID real do grupo
-        group_name: 'Desenvolvedores React', // TODO: BACKEND - Nome real do grupo
-        description: 'Comunidade para discussões sobre React, hooks, performance e boas práticas.', // TODO: BACKEND - Descrição real
-        created_at: '2024-01-15T10:00:00Z', // TODO: BACKEND - Data real de criação
-        updated_at: '2024-12-19T10:00:00Z', // TODO: BACKEND - Data real de atualização
-        member_count: 1247, // TODO: BACKEND - Contagem real de membros
-        admin_count: 5, // TODO: BACKEND - Contagem real de admins
-        user_role: 'member', // TODO: BACKEND - Papel real do usuário no grupo (vem do JOIN)
-      },
-      {
-        group_id: 2, // TODO: BACKEND - ID real do grupo
-        group_name: 'Design & UX', // TODO: BACKEND - Nome real do grupo
-        description: 'Espaço para designers compartilharem ideias, tendências e feedback.', // TODO: BACKEND - Descrição real
-        created_at: '2024-02-01T10:00:00Z', // TODO: BACKEND - Data real de criação
-        updated_at: '2024-12-19T10:00:00Z', // TODO: BACKEND - Data real de atualização
-        member_count: 892, // TODO: BACKEND - Contagem real de membros
-        admin_count: 3, // TODO: BACKEND - Contagem real de admins
-      },
-      {
-        group_id: 3, // TODO: BACKEND - ID real do grupo
-        group_name: 'Tecnologia & Sociedade', // TODO: BACKEND - Nome real do grupo
-        description: 'Discussões sobre o impacto da tecnologia na sociedade moderna.', // TODO: BACKEND - Descrição real
-        created_at: '2024-01-20T10:00:00Z', // TODO: BACKEND - Data real de criação
-        updated_at: '2024-12-19T10:00:00Z', // TODO: BACKEND - Data real de atualização
-        member_count: 654, // TODO: BACKEND - Contagem real de membros
-        admin_count: 4, // TODO: BACKEND - Contagem real de admins
-        user_role: 'admin', // TODO: BACKEND - Papel real do usuário no grupo (vem do JOIN)
-      },
-    ];
+    const defaultGroup: Group = {
+      group_id: 0,
+      group_name: 'Grupo Exemplo',
+      description: 'Este é um grupo de exemplo. A funcionalidade completa será implementada em breve.',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      member_count: 1,
+      admin_count: 1,
+      user_role: 'admin',
+    };
 
-    // TODO: SUBSTITUIR POR LÓGICA DO BACKEND - Filtrar grupos do usuário
-    // Endpoint sugerido: GET /api/users/:userId/groups
-    const mockMyGroups = mockAllGroups.filter(group => group.user_role);
-    
-    // TODO: SUBSTITUIR POR CHAMADA AO BACKEND - Buscar grupos populares
-    // Endpoint sugerido: GET /api/groups/popular?limit=10
-    const mockPopularGroups = [...mockAllGroups].sort((a, b) => (b.member_count || 0) - (a.member_count || 0));
-
-    // TODO: REMOVER SIMULAÇÃO DE CARREGAMENTO - Substituir por loading real das chamadas API
-    setTimeout(() => {
-      setAllGroups(mockAllGroups);
-      setMyGroups(mockMyGroups);
-      setPopularGroups(mockPopularGroups);
-      setLoading(false);
-    }, 1000);
+    setAllGroups([defaultGroup]);
+    setMyGroups([defaultGroup]);
+    setPopularGroups([defaultGroup]);
+    setLoading(false);
   }, []);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -190,7 +155,26 @@ const GroupsPage: React.FC = () => {
       </CardContent>
       
       <Box sx={{ p: 2, pt: 0 }}>
-        <Button variant={group.user_role ? "outlined" : "contained"} fullWidth>
+        <Button
+          variant={group.user_role ? "outlined" : "contained"}
+          fullWidth
+          onClick={() => {
+            if (!group.user_role) {
+              const updatedGroup: Group = {
+                ...group,
+                user_role: 'member' as 'member',
+              };
+            
+              setMyGroups(prev => [...prev, updatedGroup]);
+              setAllGroups(prev => prev.map(g =>
+                g.group_id === group.group_id ? updatedGroup : g
+              ));
+              setPopularGroups(prev => prev.map(g =>
+                g.group_id === group.group_id ? updatedGroup : g
+              ));
+            }
+          }}
+        >
           {group.user_role ? 'Ver Grupo' : 'Participar'}
         </Button>
       </Box>

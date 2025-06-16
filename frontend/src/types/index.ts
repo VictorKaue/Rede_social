@@ -376,12 +376,12 @@ export interface UserProfile {
   email: string;
   birth_date: string;
   profile_photo?: string | null;
+  bio: string;
+  location?: string;
+  website?: string;
   created_at: string;
-  tags?: string;
-  tag_count: number;
-  post_count: number;
-  comment_count: number;
-  rating_count: number;
+  updated_at?: string;
+  is_verified: boolean;
 }
 
 /**
@@ -750,3 +750,34 @@ export interface GroupFilters {
   sort_by?: 'group_name' | 'created_at' | 'member_count';
   sort_order?: 'asc' | 'desc';
 }
+
+// Mock data para desenvolvimento
+const mockUser: User = {
+  user_id: 1,
+  username: 'joao_silva',
+  email: 'joao@exemplo.com',
+  birth_date: '1990-05-15',
+  profile_photo: null,
+  bio: 'Desenvolvedor apaixonado por tecnologia e inovação. Sempre aberto para novas conexões e colaborações! 🚀',
+  location: 'São Paulo, Brasil',
+  website: 'https://joaosilva.dev',
+  created_at: '2024-01-15T10:00:00Z',
+  updated_at: '2024-12-19T10:00:00Z',
+  is_verified: true,
+};
+
+const mockPosts: Post[] = [
+  {
+    post_id: 1,
+    user_id: 1,
+    content: 'Acabei de lançar meu novo projeto! Uma aplicação React com Material UI que demonstra os princípios de uma rede social aberta e transparente. 🎉',
+    post_type: 'texto',
+    created_at: '2024-12-19T10:30:00Z',
+    updated_at: '2024-12-19T10:30:00Z',
+    username: 'joao_silva',
+    profile_photo: null,
+    like_count: 25,
+    dislike_count: 1,
+    comment_count: 12,
+  },
+];
