@@ -46,28 +46,34 @@ import { Comment, CreateCommentForm } from '../types';
 let mockComments: Comment[] = [
   {
     id: 1,
-    user_id: 2,
+    comment_id: 1,
     post_id: 1,
     content: 'Parabéns pelo projeto! Python é realmente uma linguagem incrível.',
-    created_at: '2023-06-01T12:00:00Z',
-    updated_at: '2023-06-01T12:00:00Z',
+    user_id: 2,
     username: 'usuario2',
     profile_photo: null,
     likes: 10,
     dislikes: 2,
-    replies: [], // Adicione respostas se necessário
+    liked: false,
+    disliked: false,
+    created_at: '2023-06-01T12:00:00Z',
+    updated_at: '2023-06-01T12:00:00Z',
+    replies: [],
   },
   {
     id: 2,
-    user_id: 3,
+    comment_id: 2,
     post_id: 1,
     content: 'Qual biblioteca você usou? Estou sempre procurando novas ferramentas.',
-    created_at: '2023-06-01T13:00:00Z',
-    updated_at: '2023-06-01T13:00:00Z',
+    user_id: 3,
     username: 'usuario3',
     profile_photo: null,
     likes: 5,
     dislikes: 1,
+    liked: false,
+    disliked: false,
+    created_at: '2023-06-01T13:00:00Z',
+    updated_at: '2023-06-01T13:00:00Z',
     replies: [],
   },
 ];
@@ -215,16 +221,16 @@ export const commentService = {
     const newComment: Comment = {
       id: nextCommentId++, // Use `id` em vez de `comment_id`
       user_id: currentUser.user_id,
-      post_id: commentData.post_id,
+      post_id: commentData.post_id as number, // Confirma que `post_id` não é undefined
       parent_comment_id: commentData.parent_comment_id || undefined, // Certifique-se de que é opcional
       content: commentData.content,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       username: currentUser.username,
       profile_photo: currentUser.profile_photo,
-      likes: 0, // Inicialize com 0 curtidas
-      dislikes: 0, // Inicialize com 0 descurtidas
-      replies: [], // Inicialize como array vazio
+      likes: 0,
+      dislikes: 0,
+      replies: [],
     };
     
     // Adiciona ao cache local (mockado)
@@ -306,17 +312,14 @@ export const commentService = {
      * @param {number} id - ID do comentário a ser removido
      */
     const removeCommentAndReplies = (id: number) => {
-      // Encontra todas as respostas diretas do comentário
       const replies = mockComments.filter(c => c.parent_comment_id === id);
 
-      // Remove recursivamente cada resposta e suas sub-respostas
       replies.forEach(reply => {
         if (reply.comment_id) {
           removeCommentAndReplies(reply.comment_id);
         }
       });
 
-      // Remove o comentário atual
       mockComments = mockComments.filter(c => c.comment_id !== id);
     };
     

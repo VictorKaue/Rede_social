@@ -118,48 +118,6 @@ const HomePage: React.FC = () => {
     }
   };
 
-  const handleCommentLike = async (commentId: number, postId: number) => {
-    try {
-      await api.post(`/comments/${commentId}/like`);
-      setPosts((prevPosts) =>
-        prevPosts.map((post) => {
-          if (post.id === postId) {
-            const updatedComments = post.comments?.map((comment) =>
-              comment.id === commentId
-                ? { ...comment, likes: comment.likes + 1 }
-                : comment
-            );
-            return { ...post, comments: updatedComments };
-          }
-          return post;
-        })
-      );
-    } catch (error) {
-      console.error('Erro ao curtir comentário:', error);
-    }
-  };
-
-  const handleCommentDislike = async (commentId: number, postId: number) => {
-    try {
-      await api.post(`/comments/${commentId}/dislike`);
-      setPosts((prevPosts) =>
-        prevPosts.map((post) => {
-          if (post.id === postId) {
-            const updatedComments = post.comments?.map((comment) =>
-              comment.id === commentId
-                ? { ...comment, dislikes: comment.dislikes + 1 }
-                : comment
-            );
-            return { ...post, comments: updatedComments };
-          }
-          return post;
-        })
-      );
-    } catch (error) {
-      console.error('Erro ao descurtir comentário:', error);
-    }
-  };
-
   const renderLoadingSkeleton = () => (
     <Box sx={{ display: 'flex', gap: 1 }}>
       <Box sx={{ flex: '1 1 66%' }}>

@@ -116,9 +116,9 @@ export interface Post {
  * - Notificações automáticas para menções
  */
 export interface Comment {
-  id: number; // ID do comentário
-  comment_id?: number; // Alias para compatibilidade com o backend
-  post_id?: number; // ID do post ao qual o comentário pertence
+  id: number; // ID único do comentário
+  comment_id?: number; // Alias opcional para compatibilidade com o backend
+  post_id: number; // ID do post ao qual o comentário pertence
   parent_comment_id?: number; // ID do comentário pai (para respostas)
   content: string; // Conteúdo do comentário
   user_id: number; // ID do usuário que fez o comentário
@@ -126,6 +126,8 @@ export interface Comment {
   profile_photo?: string | null; // Foto de perfil do usuário
   likes: number; // Número de curtidas
   dislikes: number; // Número de descurtidas
+  liked?: boolean; // Indica se o usuário curtiu o comentário
+  disliked?: boolean; // Indica se o usuário descurtiu o comentário
   created_at: string; // Data de criação
   updated_at?: string; // Data de atualização
   replies?: Comment[]; // Respostas ao comentário
