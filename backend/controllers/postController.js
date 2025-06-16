@@ -1,74 +1,62 @@
-const db = require('../config/connection');
+const Post = require('../models/Post');
 
-async function getTodosPosts(req, res) {
-    try {
-        const [linhas] = await db.query('SELECT * FROM postagens');
-        res.json(linhas);
-    } catch (erro){
-        res.status(500).json({ erro: 'Erro ao buscar posts' });
-    }
+// Criar uma postagem
+async function createPost(req, res) {
+  try {
+    const { content, type } = req.body;
+    const post = await Post.create({
+      user: req.user.id,
+      content,
+      type,
+    });
+    res.status(201).json(post);
+  } catch (error) {
+    console.error('Erro ao criar postagem:', error);
+    res.status(500).json({ error: 'Erro ao criar postagem' });
+  }
 }
 
-async function getPostPeloId(req, res) {
-    const id = req.params.id;
-    try {
-        const [linhas] = await db.query('SELECT * FROM postagens WHERE id = ?', [id]);
-        if (linhas.length === 0) {
-            return res.status(404).json({ mensagem: 'Post não encontrado' });
-        }
-        res.json(linhas[0]);
-    } catch (erro) {
-        res.status(500).json({ erro: 'Erro ao buscar post' });
-    }
+// Listar postagens
+async function getPosts(req, res) {
+  try {
+    const posts = await Post.find()
+      .populate('user', 'nome_usuario email')
+      .sort({ createdAt: -1 });
+    res.status(200).json(posts);
+  } catch (error) {
+    console.error('Erro ao listar postagens:', error);
+    res.status(500).json({ error: 'Erro ao listar postagens' });
+  }
 }
 
-async function cadastrarPost(req, res) {
-    const { usuario_id, tipo, conteudo, url_midia } = req.body;
-    try {
-        const [resultado] = await db.query(
-            'INSERT INTO postagens (usuario_id, tipo, conteudo, url_midia) VALUES (?, ?, ?, ?)',
-            [usuario_id, tipo, conteudo, url_midia]
-        );
-        res.status(201).json({ id: resultado.insertId, mensagem: 'Post criado com sucesso' });
-    } catch (erro) {
-        res.status(500).json({ erro: 'Erro ao criar post' });
-    }
+// Adicionar curtida
+async function likePost(req, res) {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ error: 'Postagem não encontrada' });
+
+    post.likes += 1;
+    await post.save();
+    res.status(200).json(post);
+  } catch (error) {
+    console.error('Erro ao curtir postagem:', error);
+    res.status(500).json({ error: 'Erro ao curtir postagem' });
+  }
 }
 
-async function atualizarPost(req, res) {
-    const id = req.params.id;
-    const { tipo, conteudo, url_midia } = req.body;
-    try {
-        const [resultado] = await db.query(
-            'UPDATE postagens SET tipo = ?, conteudo = ?, url_midia = ? WHERE id = ?',
-            [tipo, conteudo, url_midia, id]
-        );
-        if (resultado.affectedRows === 0) {
-            return res.status(404).json({ mensagem: 'Post não encontrado' });
-        }
-        res.json({ mensagem: 'Post atualizado com sucesso' });
-    } catch (erro) {
-        res.status(500).json({ erro: 'Erro ao atualizar post' });
-    }
+// Adicionar descurtida
+async function dislikePost(req, res) {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ error: 'Postagem não encontrada' });
+
+    post.dislikes += 1;
+    await post.save();
+    res.status(200).json(post);
+  } catch (error) {
+    console.error('Erro ao descurtir postagem:', error);
+    res.status(500).json({ error: 'Erro ao descurtir postagem' });
+  }
 }
 
-async function deletarPost(req, res) {
-    const id = req.params.id;
-    try {
-        const [resultado] = await db.query('DELETE FROM postagens WHERE id = ?', [id]);
-        if (resultado.affectedRows === 0) {
-            return res.status(404).json({ mensagem: 'Post não encontrado' });
-        }
-        res.json({ mensagem: 'Post deletado com sucesso' });
-    } catch (erro) {
-        res.status(500).json({ erro: 'Erro ao deletar post' });
-    }
-}
-
-module.exports = {
-    getTodosPosts,
-    getPostPeloId,
-    cadastrarPost,
-    atualizarPost,
-    deletarPost
-};
+module.exports = { createPost, getPosts, likePost, dislikePost };

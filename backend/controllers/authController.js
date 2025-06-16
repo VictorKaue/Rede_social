@@ -6,8 +6,6 @@ function gerarToken(id) {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '1d' });
 }
 
-
-
 async function register(req, res) {
   const { nome_usuario, email, senha, data_nascimento } = req.body;
   console.log("🔁 Iniciando cadastro");

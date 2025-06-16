@@ -1,11 +1,18 @@
 const express = require('express');
 const router = express.Router();
-const postController = require('../controllers/postController.js');
+const { protect } = require('../middleware/AuthMiddleware');
+const { createPost, getPosts, likePost, dislikePost } = require('../controllers/postController');
 
-router.get('/', postController.getTodosPosts);
-router.get('/:id', postController.getPostPeloId);
-router.patch('/:id', postController.atualizarPost);
-router.post('/', postController.cadastrarPost);
-router.delete('/:id', postController.deletarPost);
+// Criar uma postagem
+router.post('/', protect, createPost);
+
+// Listar postagens
+router.get('/', getPosts);
+
+// Curtir uma postagem
+router.post('/:id/like', protect, likePost);
+
+// Descurtir uma postagem
+router.post('/:id/dislike', protect, dislikePost);
 
 module.exports = router;

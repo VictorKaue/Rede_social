@@ -12,7 +12,7 @@ const db = require('./config/connection'); // Pool de conexões
 app.use(express.json());
 app.use(cors());
 app.use('/api/usuario', rotasUsuario);
-app.use('/api/post', rotasPost);
+app.use('/api/posts', rotasPost);
 app.use('/api/auth', rotasAuth);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
@@ -22,7 +22,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
         await db.query('SELECT 1'); // Testa uma consulta simples
         console.log('Conexão com o banco de dados estabelecida com sucesso');
     } catch (erro) {
-        console.error('Erro ao conectar ao banco de dados:', erro);
+        console.error('Erro ao conec-tar ao banco de dados:', erro);
         process.exit(1); // Encerra o processo em caso de erro
     }
 })();
