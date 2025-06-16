@@ -48,35 +48,15 @@ async function atualizarUsuario(req, res) {
 }
 
 async function cadastrarUsuario(req, res) {
-    let { nome_usuario, email, senha_hash, data_nascimento } = req.body;
-    const foto_perfil = req.file ? `/uploads/perfis/${req.file.filename}` : null;
-    // Validação básica
-    if (!email || typeof email !== 'string' || email.trim() === '') {
-        return res.status(400).json({ erro: 'O campo email é obrigatório e não pode estar vazio.' });
-    }
-
+    const { nome_usuario, email, senha, data_nascimento, foto_perfil } = req.body;
     try {
-        // varifica se o email já está cadastrado
-        const [usuariosExistentes] = await db.query('SELECT id FROM usuarios WHERE email = ?', [email]);
-        if (usuariosExistentes.length > 0) {
-            return res.status(409).json({ erro: 'E-mail já cadastrado.' });
-        }
-
-        // criptografia da senha
-        if (!senha_hash) {
-            return res.status(400).json({ erro: 'O campo senha é obrigatório.' });
-        }
-        const saltRounds = 10;
-        senha_hash = await bcrypt.hash(senha_hash, saltRounds);
-
-        const [resultado] = await db.query(
-            'INSERT INTO usuarios (nome_usuario, email, senha_hash, data_nascimento, foto_perfil) VALUES (?, ?, ?, ?, ?)',
-            [nome_usuario, email, senha_hash, data_nascimento, foto_perfil]
-        );
-        res.status(201).json({ id: resultado.insertId, mensagem: 'Usuário criado com sucesso' });
+        const senhaHash = await bcrypt.hash(senha, 10);
+        await db.query('INSERT INTO usuarios (nome_usuario, email, senha_hash, data_nascimento, foto_perfil) VALUES (?, ?, ?, ?, ?)', 
+            [nome_usuario, email, senhaHash, data_nascimento, foto_perfil]);
+        res.status(201).json({ mensagem: 'Usuário cadastrado com sucesso!' });
     } catch (erro) {
-        console.error('Erro ao criar usuário:', erro.message);
-        res.status(500).json({ erro: 'Erro ao criar usuário', detalhes: erro.message });
+        console.error('Erro ao cadastrar usuário:', erro.message);
+        res.status(500).json({ erro: 'Erro ao cadastrar usuário' });
     }
 }
 

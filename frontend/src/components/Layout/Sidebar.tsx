@@ -50,6 +50,7 @@ import {
   People as PeopleIcon,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext'; // Certifique-se de que o AuthContext está implementado
 
 // =============================================================================
 // CONSTANTES E CONFIGURAÇÕES
@@ -100,19 +101,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open = true, onClose }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // =============================================================================
-  // DADOS MOCKADOS - A SER SUBSTITUÍDO POR INTEGRAÇÃO BACKEND
-  // =============================================================================
-  
-  /**
-   * Dados do usuário atual
-   * TODO: Substituir por dados do AuthContext/UserContext
-   * TODO: Integrar com endpoint GET /api/auth/me
-   */
-  const currentUser = {
-    username: 'joao_silva',
-    profile_photo: null,
-  };
+  const { currentUser } = useAuth();
 
   // =============================================================================
   // CONFIGURAÇÕES DE NAVEGAÇÃO
@@ -128,39 +117,10 @@ const Sidebar: React.FC<SidebarProps> = ({ open = true, onClose }) => {
    */
   const menuItems = [
     {
-      text: 'Início',
-      icon: <HomeIcon />,
-      path: '/',
-      description: 'Timeline principal com postagens de todos',
-      // TODO: Adicionar contador de novas postagens desde última visita
-    },
-    {
       text: 'Meu Perfil',
       icon: <PersonIcon />,
-      path: `/profile/${currentUser.username}`,
+      path: currentUser ? `/profile/${currentUser.username}` : '/login',
       description: 'Visualizar e editar seu perfil',
-      // TODO: Adicionar indicador de perfil incompleto
-    },
-    {
-      text: 'Explorar',
-      icon: <ExploreIcon />,
-      path: '/explore',
-      description: 'Descobrir novos usuários e conteúdo',
-      // TODO: Adicionar sugestões personalizadas baseadas em interesses
-    },
-    {
-      text: 'Grupos',
-      icon: <GroupIcon />,
-      path: '/groups',
-      description: 'Participar de comunidades temáticas',
-      // TODO: Adicionar contador de grupos com atividade nova
-    },
-    {
-      text: 'Mensagens',
-      icon: <MessageIcon />,
-      path: '/messages',
-      description: 'Conversas privadas com outros usuários',
-      // TODO: Adicionar contador de mensagens não lidas
     },
   ];
 
@@ -494,4 +454,4 @@ export default Sidebar;
  * - [ ] Lazy loading de componentes não críticos
  * - [ ] Memoização de itens de menu pesados
  * - [ ] Otimização para SSR (Server-Side Rendering)
- */ 
+ */

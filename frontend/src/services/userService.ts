@@ -120,11 +120,8 @@ export const userService = {
    * - Rate limiting para prevenir spam de consultas
    */
   async getUserProfile(userId: number): Promise<User | null> {
-    // Simula delay de rede (300ms)
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    const user = mockUsers.find(u => u.user_id === userId);
-    return user || null;
+    const response = await api.get(`/api/users/${userId}/profile`);
+    return response.data;
   },
 
   /**
@@ -153,22 +150,8 @@ export const userService = {
    * - Trigger para atualizar updated_at automaticamente
    */
   async updateProfile(userId: number, profileData: UpdateProfileForm): Promise<User> {
-    // Simula delay de rede (500ms para operação de escrita)
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    const userIndex = mockUsers.findIndex(u => u.user_id === userId);
-    if (userIndex === -1) {
-      throw new Error('Usuário não encontrado');
-    }
-
-    const updatedUser = {
-      ...mockUsers[userIndex],
-      ...profileData,
-      updated_at: new Date().toISOString(),
-    };
-
-    mockUsers[userIndex] = updatedUser;
-    return updatedUser;
+    const response = await api.put(`/api/users/${userId}/profile`, profileData);
+    return response.data;
   },
 
   /**
@@ -197,30 +180,8 @@ export const userService = {
    * - Constraint UNIQUE (user_id, connected_user_id)
    */
   async followUser(currentUserId: number, targetUserId: number): Promise<boolean> {
-    // Simula delay de rede (400ms)
-    await new Promise(resolve => setTimeout(resolve, 400));
-    
-    if (currentUserId === targetUserId) {
-      throw new Error('Você não pode seguir a si mesmo');
-    }
-
-    const currentUserData = mockFollowingData.get(currentUserId) || { followers: [], following: [] };
-    const targetUserData = mockFollowingData.get(targetUserId) || { followers: [], following: [] };
-
-    // Verificar se já está seguindo
-    if (currentUserData.following.includes(targetUserId)) {
-      return false; // Já está seguindo
-    }
-
-    // Adicionar aos seguindo do usuário atual
-    currentUserData.following.push(targetUserId);
-    mockFollowingData.set(currentUserId, currentUserData);
-
-    // Adicionar aos seguidores do usuário alvo
-    targetUserData.followers.push(currentUserId);
-    mockFollowingData.set(targetUserId, targetUserData);
-
-    return true;
+    const response = await api.post(`/api/connections/follow`, { targetUserId });
+    return response.status === 201;
   },
 
   /**
@@ -240,26 +201,8 @@ export const userService = {
    * - Validar se conexão existe antes de tentar remover
    */
   async unfollowUser(currentUserId: number, targetUserId: number): Promise<boolean> {
-    // Simula delay de rede (400ms)
-    await new Promise(resolve => setTimeout(resolve, 400));
-    
-    const currentUserData = mockFollowingData.get(currentUserId) || { followers: [], following: [] };
-    const targetUserData = mockFollowingData.get(targetUserId) || { followers: [], following: [] };
-
-    // Verificar se está seguindo
-    if (!currentUserData.following.includes(targetUserId)) {
-      return false; // Não está seguindo
-    }
-
-    // Remover dos seguindo do usuário atual
-    currentUserData.following = currentUserData.following.filter(id => id !== targetUserId);
-    mockFollowingData.set(currentUserId, currentUserData);
-
-    // Remover dos seguidores do usuário alvo
-    targetUserData.followers = targetUserData.followers.filter(id => id !== currentUserId);
-    mockFollowingData.set(targetUserId, targetUserData);
-
-    return true;
+    const response = await api.delete(`/api/connections/follow/${targetUserId}`);
+    return response.status === 200;
   },
 
   /**
@@ -279,11 +222,8 @@ export const userService = {
    * - Rate limiting para prevenir abuse
    */
   async isFollowing(currentUserId: number, targetUserId: number): Promise<boolean> {
-    // Simula delay de rede (200ms - consulta rápida)
-    await new Promise(resolve => setTimeout(resolve, 200));
-    
-    const currentUserData = mockFollowingData.get(currentUserId) || { followers: [], following: [] };
-    return currentUserData.following.includes(targetUserId);
+    const response = await api.get(`/api/connections/is-following/${targetUserId}`);
+    return response.data.isFollowing;
   },
 
   /**
@@ -303,14 +243,8 @@ export const userService = {
    * - Incluir em resposta do perfil para reduzir requests
    */
   async getFollowStats(userId: number): Promise<{ followers: number; following: number }> {
-    // Simula delay de rede (200ms - consulta rápida)
-    await new Promise(resolve => setTimeout(resolve, 200));
-    
-    const userData = mockFollowingData.get(userId) || { followers: [], following: [] };
-    return {
-      followers: userData.followers.length,
-      following: userData.following.length,
-    };
+    const response = await api.get(`/api/users/${userId}/follow-stats`);
+    return response.data;
   },
 
   /**
@@ -339,32 +273,8 @@ export const userService = {
    * - Filtro de conteúdo impróprio (opcional)
    */
   async sendMessage(messageData: SendMessageForm): Promise<Message> {
-    // Simula delay de rede (600ms - operação de escrita + notificação)
-    await new Promise(resolve => setTimeout(resolve, 600));
-    
-    // Buscar dados dos usuários
-    const sender = mockUsers.find(u => u.user_id === 1); // FIXME: Simula usuário logado (deveria vir do contexto de auth)
-    const receiver = mockUsers.find(u => u.user_id === messageData.receiver_id);
-    
-    if (!sender || !receiver) {
-      throw new Error('Usuário não encontrado');
-    }
-
-    const newMessage: Message = {
-      message_id: nextMessageId++,
-      sender_id: sender.user_id,
-      receiver_id: messageData.receiver_id,
-      content: messageData.content,
-      status: 'sent',
-      sent_at: new Date().toISOString(),
-      sender_username: sender.username,
-      receiver_username: receiver.username,
-      sender_photo: sender.profile_photo,
-      receiver_photo: receiver.profile_photo,
-    };
-
-    mockMessages.push(newMessage);
-    return newMessage;
+    const response = await api.post(`/api/messages`, messageData);
+    return response.data;
   },
 
   /**
@@ -438,19 +348,8 @@ export const userService = {
    * - Autocomplete para sugestões em tempo real
    */
   async searchUsers(searchTerm: string): Promise<User[]> {
-    // Simula delay de rede (400ms)
-    await new Promise(resolve => setTimeout(resolve, 400));
-    
-    if (!searchTerm.trim()) {
-      return [];
-    }
-
-    const filtered = mockUsers.filter(user => 
-      user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.bio?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    return filtered.slice(0, 10); // Limitar resultados para performance
+    const response = await api.get(`/api/users/search?q=${searchTerm}`);
+    return response.data;
   },
 
   /**
@@ -503,9 +402,48 @@ export const userService = {
    * - Cache Redis para contagens (TTL: 5 minutos)
    */
   async getPostCount(userId: number): Promise<number> {
-    const response = await api.get(`/api/usuario/${userId}/posts/count`);
+    const response = await api.get(`/api/users/${userId}/posts/count`);
+    return response.data.posts;
+  },
+
+  /**
+   * OBTER CONVERSAS
+   * 
+   * Obtém a lista de conversas do usuário logado.
+   * Cada conversa inclui participantes e último mensagem.
+   * 
+   * @returns Promise<Message[]> - Lista de mensagens/conversas
+   * 
+   * BACKEND TODO:
+   * - Endpoint: GET /api/messages/conversations
+   * - Autenticação obrigatória (JWT)
+   * - Incluir informações do remetente e destinatário
+   * - Ordenar por data da última mensagem
+   * - Paginação para grandes volumes de mensagens
+   */
+  async getConversations(): Promise<Message[]> {
+    const response = await api.get(`/api/messages/conversations`);
     return response.data;
   },
+
+  /**
+   * MARCAR MENSAGEM COMO LIDA
+   * 
+   * Atualiza o status de uma mensagem para 'lida'.
+   * 
+   * @param messageId - ID da mensagem a ser marcada como lida
+   * @returns Promise<boolean> - true se a mensagem foi marcada como lida com sucesso
+   * 
+   * BACKEND TODO:
+   * - Endpoint: PUT /api/messages/:messageId/read
+   * - Atualizar status da mensagem no banco de dados
+   * - Notificar destinatário sobre a leitura (opcional)
+   * - Rate limiting para prevenir abusos
+   */
+  async markMessageAsRead(messageId: number): Promise<boolean> {
+    const response = await api.put(`/api/messages/${messageId}/read`);
+    return response.status === 200;
+  }
 };
 
 // ============================================================================
