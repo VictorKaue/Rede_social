@@ -16,4 +16,12 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Endpoints de postagens
+export const fetchPosts = () => api.get('/posts');
+export const likePost = (postId: string) => api.post(`/posts/${postId}/like`);
+export const dislikePost = (postId: string) => api.post(`/posts/${postId}/dislike`);
+export const fetchComments = (postId: string) => api.get(`/posts/${postId}/comments`);
+export const addComment = (postId: string, content: string) =>
+  api.post(`/posts/${postId}/comments`, { content });
+
 export default api;

@@ -74,6 +74,14 @@ export default function RegisterPage() {
           <Button type="submit" variant="contained" color="primary">
             Cadastrar
           </Button>
+          <Button
+            variant="text"
+            color="primary"
+            sx={{ mt: 2 }}
+            onClick={() => navigate('/login')}
+          >
+            Já tem uma conta? Faça login
+          </Button>
         </Box>
       </Card>
     </Container>

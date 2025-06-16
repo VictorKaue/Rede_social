@@ -83,19 +83,19 @@ export interface User {
  * - Triggers para atualizar contadores automaticamente
  */
 export interface Post {
-  post_id: number;
-  user_id: number;
-  content: string;
-  post_type: 'texto' | 'imagem';
-  created_at: string;
-  updated_at: string;
-  // Dados do usuário (join)
-  username?: string;
-  profile_photo?: string | null;
-  // Contadores básicos
-  like_count?: number;
-  dislike_count?: number;
-  comment_count?: number;
+  post_id: number; // ID único do post
+  id?: number; // Alias opcional para compatibilidade
+  user_id: number; // ID do usuário que criou o post
+  content: string; // Conteúdo do post
+  post_type: string; // Tipo do post (ex: "texto", "imagem")
+  created_at: string; // Data de criação
+  updated_at?: string; // Data de atualização
+  username: string; // Nome do usuário
+  profile_photo?: string | null; // Foto de perfil do usuário
+  like_count: number; // Número de curtidas
+  dislike_count: number; // Número de descurtidas
+  comment_count: number; // Número de comentários
+  comments?: Comment[]; // Lista de comentários associados ao post
 }
 
 /**
@@ -116,18 +116,19 @@ export interface Post {
  * - Notificações automáticas para menções
  */
 export interface Comment {
-  comment_id: number;
-  user_id: number;
-  post_id?: number;
-  parent_comment_id?: number;
-  content: string;
-  created_at: string;
-  updated_at: string;
-  // Dados do usuário (join)
-  username?: string;
-  profile_photo?: string | null;
-  // Respostas aninhadas
-  replies?: Comment[];
+  id: number; // ID do comentário
+  comment_id?: number; // Alias para compatibilidade com o backend
+  post_id?: number; // ID do post ao qual o comentário pertence
+  parent_comment_id?: number; // ID do comentário pai (para respostas)
+  content: string; // Conteúdo do comentário
+  user_id: number; // ID do usuário que fez o comentário
+  username: string; // Nome do usuário
+  profile_photo?: string | null; // Foto de perfil do usuário
+  likes: number; // Número de curtidas
+  dislikes: number; // Número de descurtidas
+  created_at: string; // Data de criação
+  updated_at?: string; // Data de atualização
+  replies?: Comment[]; // Respostas ao comentário
 }
 
 /**
@@ -746,4 +747,4 @@ export interface GroupFilters {
   created_after?: string;
   sort_by?: 'group_name' | 'created_at' | 'member_count';
   sort_order?: 'asc' | 'desc';
-} 
+}

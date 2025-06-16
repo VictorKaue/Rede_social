@@ -45,67 +45,30 @@ import { Comment, CreateCommentForm } from '../types';
  */
 let mockComments: Comment[] = [
   {
-    comment_id: 1,
+    id: 1,
     user_id: 2,
     post_id: 1,
     content: 'Parabéns pelo projeto! Python é realmente uma linguagem incrível.',
-    created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 dias atrás
-    updated_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    username: 'maria_santos',
+    created_at: '2023-06-01T12:00:00Z',
+    updated_at: '2023-06-01T12:00:00Z',
+    username: 'usuario2',
     profile_photo: null,
-    // parent_comment_id é undefined = comentário principal
+    likes: 10,
+    dislikes: 2,
+    replies: [], // Adicione respostas se necessário
   },
   {
-    comment_id: 2,
+    id: 2,
     user_id: 3,
     post_id: 1,
     content: 'Qual biblioteca você usou? Estou sempre procurando novas ferramentas.',
-    created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 dia atrás
-    updated_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    username: 'pedro_costa',
+    created_at: '2023-06-01T13:00:00Z',
+    updated_at: '2023-06-01T13:00:00Z',
+    username: 'usuario3',
     profile_photo: null,
-    // Comentário principal
-  },
-  {
-    comment_id: 3,
-    user_id: 1,
-    post_id: 1,
-    parent_comment_id: 2, // Resposta ao comentário #2
-    content: 'Usei Django REST Framework. Super recomendo!',
-    created_at: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(), // 12 horas atrás
-    updated_at: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
-    username: 'joao_silva',
-    profile_photo: null,
-  },
-  {
-    comment_id: 4,
-    user_id: 4,
-    post_id: 2,
-    content: 'Adoro museus! Qual foi a obra que mais te impressionou?',
-    created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    updated_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    username: 'ana_oliveira',
-    profile_photo: null,
-  },
-  {
-    comment_id: 5,
-    user_id: 5,
-    post_id: 3,
-    content: 'Boa sorte no campeonato! Torço por vocês.',
-    created_at: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(), // 6 horas atrás
-    updated_at: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
-    username: 'carlos_souza',
-    profile_photo: null,
-  },
-  {
-    comment_id: 6,
-    user_id: 6,
-    post_id: 3,
-    content: 'Futebol é vida! Qual posição você joga?',
-    created_at: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(), // 4 horas atrás
-    updated_at: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
-    username: 'lucas_lima',
-    profile_photo: null,
+    likes: 5,
+    dislikes: 1,
+    replies: [],
   },
 ];
 
@@ -175,23 +138,23 @@ export const commentService = {
     
     // Primeiro passo: mapear todos os comentários com array de respostas
     postComments.forEach(comment => {
-      commentsMap.set(comment.comment_id, { ...comment, replies: [] });
+      if (comment.comment_id) {
+        commentsMap.set(comment.comment_id, { ...comment, replies: [] });
+      }
     });
     
-    // Segundo passo: organizar hierarquia parent-child
+    // Segundo passo: organizar hierárquica parent-child
     postComments.forEach(comment => {
-      const commentWithReplies = commentsMap.get(comment.comment_id);
+      const commentWithReplies = comment.comment_id ? commentsMap.get(comment.comment_id) : undefined;
       if (!commentWithReplies) return;
-      
+
       if (comment.parent_comment_id) {
-        // É uma resposta - adicionar ao comentário pai
         const parentComment = commentsMap.get(comment.parent_comment_id);
         if (parentComment) {
           parentComment.replies = parentComment.replies || [];
           parentComment.replies.push(commentWithReplies);
         }
       } else {
-        // É um comentário principal - adicionar à raiz
         rootComments.push(commentWithReplies);
       }
     });
@@ -250,15 +213,18 @@ export const commentService = {
     
     // Cria novo comentário com dados completos
     const newComment: Comment = {
-      comment_id: nextCommentId++, // TODO: Backend deve gerar ID único
+      id: nextCommentId++, // Use `id` em vez de `comment_id`
       user_id: currentUser.user_id,
       post_id: commentData.post_id,
-      parent_comment_id: commentData.parent_comment_id, // null para comentário principal
+      parent_comment_id: commentData.parent_comment_id || undefined, // Certifique-se de que é opcional
       content: commentData.content,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-      username: currentUser.username, // TODO: Vem do JOIN com tabela users
-      profile_photo: currentUser.profile_photo, // TODO: Vem do JOIN com tabela users
+      username: currentUser.username,
+      profile_photo: currentUser.profile_photo,
+      likes: 0, // Inicialize com 0 curtidas
+      dislikes: 0, // Inicialize com 0 descurtidas
+      replies: [], // Inicialize como array vazio
     };
     
     // Adiciona ao cache local (mockado)
@@ -342,10 +308,14 @@ export const commentService = {
     const removeCommentAndReplies = (id: number) => {
       // Encontra todas as respostas diretas do comentário
       const replies = mockComments.filter(c => c.parent_comment_id === id);
-      
+
       // Remove recursivamente cada resposta e suas sub-respostas
-      replies.forEach(reply => removeCommentAndReplies(reply.comment_id));
-      
+      replies.forEach(reply => {
+        if (reply.comment_id) {
+          removeCommentAndReplies(reply.comment_id);
+        }
+      });
+
       // Remove o comentário atual
       mockComments = mockComments.filter(c => c.comment_id !== id);
     };
@@ -486,4 +456,4 @@ export const commentService = {
  * - [ ] Análise de sentimento automática
  * - [ ] Relatórios de atividade para moderadores
  * - [ ] A/B testing para layouts de comentários
- */ 
+ */

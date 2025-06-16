@@ -27,7 +27,7 @@
  * TODO: Adicionar filtros de timeline (todos, seguindo, grupos)
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Container,
@@ -54,21 +54,28 @@ const HomePage: React.FC = () => {
   const [createPostOpen, setCreatePostOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const token = localStorage.getItem('authToken');
-        const response = await api.get('/posts/timeline', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setPosts(response.data.posts);
-      } catch (error) {
-        console.error('Erro ao carregar posts:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchPosts = async () => {
+    try {
+      const response = await api.get('/posts');
+      const mappedPosts = response.data.map((post: any) => ({
+        post_id: post.id,
+        user_id: post.usuario_id,
+        content: post.conteudo,
+        type: post.tipo,
+        created_at: post.data_criacao,
+        username: post.nome_usuario,
+        profile_photo: post.foto_perfil,
+      }));
+      setPosts(mappedPosts);
+    } catch (error) {
+      console.error('Erro ao carregar postagens:', error);
+      setError('Falha ao carregar posts');
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchPosts();
   }, []);
 
@@ -83,6 +90,74 @@ const HomePage: React.FC = () => {
         post.post_id === updatedPost.post_id ? updatedPost : post
       )
     );
+  };
+
+  const handleLike = async (postId: number) => {
+    try {
+      await api.post(`/posts/${postId}/like`);
+      setPosts(prev =>
+        prev.map(post =>
+          post.post_id === postId ? { ...post, liked: true } : post
+        )
+      );
+    } catch (error) {
+      console.error('Erro ao curtir post:', error);
+    }
+  };
+
+  const handleDislike = async (postId: number) => {
+    try {
+      await api.post(`/posts/${postId}/dislike`);
+      setPosts(prev =>
+        prev.map(post =>
+          post.post_id === postId ? { ...post, disliked: true } : post
+        )
+      );
+    } catch (error) {
+      console.error('Erro ao descurtir post:', error);
+    }
+  };
+
+  const handleCommentLike = async (commentId: number, postId: number) => {
+    try {
+      await api.post(`/comments/${commentId}/like`);
+      setPosts((prevPosts) =>
+        prevPosts.map((post) => {
+          if (post.id === postId) {
+            const updatedComments = post.comments?.map((comment) =>
+              comment.id === commentId
+                ? { ...comment, likes: comment.likes + 1 }
+                : comment
+            );
+            return { ...post, comments: updatedComments };
+          }
+          return post;
+        })
+      );
+    } catch (error) {
+      console.error('Erro ao curtir comentário:', error);
+    }
+  };
+
+  const handleCommentDislike = async (commentId: number, postId: number) => {
+    try {
+      await api.post(`/comments/${commentId}/dislike`);
+      setPosts((prevPosts) =>
+        prevPosts.map((post) => {
+          if (post.id === postId) {
+            const updatedComments = post.comments?.map((comment) =>
+              comment.id === commentId
+                ? { ...comment, dislikes: comment.dislikes + 1 }
+                : comment
+            );
+            return { ...post, comments: updatedComments };
+          }
+          return post;
+        })
+      );
+    } catch (error) {
+      console.error('Erro ao descurtir comentário:', error);
+    }
   };
 
   const renderLoadingSkeleton = () => (
@@ -134,7 +209,10 @@ const HomePage: React.FC = () => {
                 <PostCard
                   key={post.post_id}
                   post={post}
+                  setPosts={setPosts} // Passa o setPosts como prop
                   onUpdate={handlePostUpdate}
+                  onLike={() => handleLike(post.post_id)}
+                  onDislike={() => handleDislike(post.post_id)}
                 />
               ))
             )}

@@ -69,10 +69,14 @@ import CommentsModal from './CommentsModal';
  * @param {function} onUpdate - Callback para atualizar dados do post no componente pai
  * @param {SxProps<Theme>} sx - Estilos customizados opcionais
  */
+
 interface PostCardProps {
   post: Post;
-  onUpdate?: (post: Post) => void;
-  sx?: SxProps<Theme>;
+  setPosts: React.Dispatch<React.SetStateAction<Post[]>>; // Estado global de posts
+  onUpdate: (updatedPost: Post) => void; // Callback para atualizar o post
+  onLike: () => void; // Callback para curtir
+  onDislike: () => void; // Callback para descurtir
+  sx?: SxProps<Theme>; // Estilos customizados opcionais
 }
 
 // =============================================================================
@@ -80,7 +84,7 @@ interface PostCardProps {
 // =============================================================================
 
 /**
- * Componente PostCard - Card de exibição de postagem
+ * Componente PostCard - Card de exibição postagem
  * 
  * Renderiza uma postagem completa com todas as funcionalidades de interação.
  * Gerencia estado local das reações e sincroniza com o backend.
@@ -88,7 +92,7 @@ interface PostCardProps {
  * @param {PostCardProps} props - Props do componente
  * @returns {JSX.Element} Card da postagem com todas as interações
  */
-const PostCard: React.FC<PostCardProps> = ({ post, onUpdate, sx }) => {
+const PostCard: React.FC<PostCardProps> = ({ post, setPosts, onUpdate, sx }) => {
   // =============================================================================
   // ESTADO LOCAL
   // =============================================================================
@@ -620,4 +624,4 @@ export default PostCard;
  * - [ ] Filtros de conteúdo sensível
  * - [ ] Bloqueio e silenciamento de usuários
  * - [ ] Prevenção de spam
- */ 
+ */

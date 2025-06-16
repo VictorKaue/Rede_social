@@ -27,6 +27,8 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
     }
 })();
 
-app.listen(PORTA, () => {
-    console.log(`Express rodando na porta ${PORTA}`);
+// Porta do servidor
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+  console.log(`Servidor rodando na porta ${PORT}`);
 });

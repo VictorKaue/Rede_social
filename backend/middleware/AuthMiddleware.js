@@ -1,21 +1,22 @@
 const jwt = require('jsonwebtoken');
-const db = require('../config/connection');
 
-async function protect(req, res, next) {
-  const token = req.headers.authorization?.split(' ')[1];
+function protect(req, res, next) {
+  const token = req.headers.authorization?.split(' ')[1]; // Extrai o token do cabeçalho Authorization
+
   if (!token) {
-    return res.status(401).json({ erro: 'Não autorizado, token ausente' });
+    return res.status(401).json({ error: 'Token não fornecido' });
   }
+
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const [usuario] = await db.query('SELECT * FROM usuarios WHERE id = ?', [decoded.id]);
-    if (!usuario.length) {
-      return res.status(401).json({ erro: 'Não autorizado, usuário não encontrado' });
-    }
-    req.user = usuario[0];
+    console.log('Token recebido:', token);
+    console.log('Segredo usado para verificar:', process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET); // Decodifica o token
+    req.user = decoded; // Adiciona os dados do usuário ao objeto req
+    console.log('Token decodificado:', decoded);
     next();
-  } catch (erro) {
-    res.status(401).json({ erro: 'Token inválido' });
+  } catch (error) {
+    console.error('Erro ao verificar token:', error.message);
+    res.status(401).json({ error: 'Token inválido' });
   }
 }
 

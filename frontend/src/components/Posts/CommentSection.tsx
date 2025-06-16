@@ -94,16 +94,7 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, onReply, depth = 0 }
             <Button
               size="small"
               startIcon={<ReplyIcon fontSize="small" />}
-              onClick={() => onReply(comment.comment_id)}
-              sx={{ 
-                minWidth: 'auto',
-                textTransform: 'none',
-                fontSize: '0.75rem',
-                color: 'text.secondary',
-                '&:hover': {
-                  color: 'primary.main',
-                },
-              }}
+              onClick={() => comment.comment_id && onReply(comment.comment_id)} // Verifica se `comment_id` existe
             >
               Responder
             </Button>
@@ -362,4 +353,4 @@ const CommentSection: React.FC<CommentSectionProps> = ({
   );
 };
 
-export default CommentSection; 
+export default CommentSection;

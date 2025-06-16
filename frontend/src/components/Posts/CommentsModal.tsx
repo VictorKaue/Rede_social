@@ -99,7 +99,7 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, onReply, depth = 0 }
             <Button
               size="small"
               variant="text"
-              onClick={() => onReply(comment.comment_id)}
+              onClick={() => comment.comment_id && onReply(comment.comment_id)} // Verifica se `comment_id` existe
               sx={{ 
                 minWidth: 'auto',
                 textTransform: 'none',
@@ -437,4 +437,4 @@ const CommentsModal: React.FC<CommentsModalProps> = ({
   );
 };
 
-export default CommentsModal; 
+export default CommentsModal;

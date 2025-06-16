@@ -369,6 +369,9 @@ const ExplorePage: React.FC = () => {
                   key={post.post_id}
                   post={post}
                   onUpdate={handlePostUpdate}
+                  setPosts={() => {}} // Função vazia, se não for necessário
+                  onLike={() => console.log('Like acionado')} // Substitua por lógica real, se necessário
+                  onDislike={() => console.log('Dislike acionado')} // Substitua por lógica real, se necessário
                   sx={{ mb: 2 }}
                 />
               ))
@@ -601,4 +604,4 @@ const ExplorePage: React.FC = () => {
   );
 };
 
-export default ExplorePage; 
+export default ExplorePage;
