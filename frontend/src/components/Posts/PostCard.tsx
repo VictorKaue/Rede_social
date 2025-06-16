@@ -56,6 +56,7 @@ import { ptBR } from 'date-fns/locale';
 import { Post } from '../../types';
 import CommentSection from './CommentSection';
 import CommentsModal from './CommentsModal';
+import CommentItem from '../Comments/CommentItem';
 
 // =============================================================================
 // INTERFACES E TIPOS
@@ -70,13 +71,16 @@ import CommentsModal from './CommentsModal';
  * @param {SxProps<Theme>} sx - Estilos customizados opcionais
  */
 
-interface PostCardProps {
+
+export interface PostCardProps {
   post: Post;
-  setPosts: React.Dispatch<React.SetStateAction<Post[]>>; // Estado global de posts
-  onUpdate: (updatedPost: Post) => void; // Callback para atualizar o post
-  onLike: () => void; // Callback para curtir
-  onDislike: () => void; // Callback para descurtir
-  sx?: SxProps<Theme>; // Estilos customizados opcionais
+  setPosts: React.Dispatch<React.SetStateAction<Post[]>>;
+  onUpdate: (updatedPost: Post) => void;
+  onLike: () => void;
+  onDislike: () => void;
+  onLikeComment?: (commentId: number) => void;
+  onDislikeComment?: (commentId: number) => void;
+  sx?: SxProps<Theme>; // Adicione esta propriedade
 }
 
 // =============================================================================
@@ -92,7 +96,7 @@ interface PostCardProps {
  * @param {PostCardProps} props - Props do componente
  * @returns {JSX.Element} Card da postagem com todas as interações
  */
-const PostCard: React.FC<PostCardProps> = ({ post, setPosts, onUpdate, sx }) => {
+const PostCard: React.FC<PostCardProps> = ({ post, setPosts, onUpdate, sx, onLikeComment, onDislikeComment }) => {
   // =============================================================================
   // ESTADO LOCAL
   // =============================================================================

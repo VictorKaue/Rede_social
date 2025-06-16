@@ -1,32 +1,3 @@
-/**
- * =============================================================================
- * HOME PAGE - PÁGINA PRINCIPAL DA TIMELINE
- * =============================================================================
- * 
- * Página principal da rede social onde os usuários visualizam sua timeline
- * com posts de usuários que seguem e conteúdo relevante.
- * 
- * CARACTERÍSTICAS:
- * - Layout responsivo com duas colunas (desktop) e uma coluna (mobile)
- * - Timeline infinita com posts ordenados cronologicamente
- * - Botão FAB para criação rápida de posts
- * - Sidebar com widgets informativos (apenas desktop)
- * - Estados de loading com skeletons elegantes
- * - Atualização otimista de posts
- * 
- * INTEGRAÇÕES BACKEND NECESSÁRIAS:
- * - GET /api/posts/timeline - Feed personalizado do usuário
- * - POST /api/posts - Criar nova postagem
- * - PUT /api/posts/:id - Atualizar postagem existente
- * - WebSocket para atualizações em tempo real
- * - Sistema de paginação infinita
- * 
- * TODO: Implementar infinite scrolling
- * TODO: Adicionar pull-to-refresh no mobile
- * TODO: Implementar cache local de posts
- * TODO: Adicionar filtros de timeline (todos, seguindo, grupos)
- */
-
 import React, { useEffect, useState } from 'react';
 import {
   Box,
@@ -46,13 +17,13 @@ import CreatePostDialog from '../components/Posts/CreatePostDialog';
 import TrendingSidebar from '../components/Widgets/TrendingSidebar';
 import WelcomeCard from '../components/Widgets/WelcomeCard';
 
+
 const HomePage: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [createPostOpen, setCreatePostOpen] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const fetchPosts = async () => {
     try {
@@ -65,11 +36,11 @@ const HomePage: React.FC = () => {
         created_at: post.data_criacao,
         username: post.nome_usuario,
         profile_photo: post.foto_perfil,
+        comments: post.comentarios || [], // Certifique-se de que os comentários estão incluídos
       }));
       setPosts(mappedPosts);
     } catch (error) {
       console.error('Erro ao carregar postagens:', error);
-      setError('Falha ao carregar posts');
     } finally {
       setLoading(false);
     }
@@ -115,6 +86,27 @@ const HomePage: React.FC = () => {
       );
     } catch (error) {
       console.error('Erro ao descurtir post:', error);
+    }
+  };
+
+  // New functions to handle likes/dislikes on comments
+  const handleLikeComment = async (commentId: number) => {
+    try {
+      await api.post(`/comments/${commentId}/like`);
+      // Update local state if comments are stored here, else pass handlers down
+      // This is a placeholder for updating comment state
+    } catch (error) {
+      console.error('Erro ao curtir comentário:', error);
+    }
+  };
+
+  const handleDislikeComment = async (commentId: number) => {
+    try {
+      await api.post(`/comments/${commentId}/dislike`);
+      // Update local state if comments are stored here, else pass handlers down
+      // This is a placeholder for updating comment state
+    } catch (error) {
+      console.error('Erro ao descurtir comentário:', error);
     }
   };
 
@@ -171,6 +163,8 @@ const HomePage: React.FC = () => {
                   onUpdate={handlePostUpdate}
                   onLike={() => handleLike(post.post_id)}
                   onDislike={() => handleDislike(post.post_id)}
+                  onLikeComment={handleLikeComment} // Passa os handlers de comentário
+                  onDislikeComment={handleDislikeComment}
                 />
               ))
             )}
