@@ -42,9 +42,7 @@ import {
 import {
   Home as HomeIcon,
   Person as PersonIcon,
-  Explore as ExploreIcon,
   Group as GroupIcon,
-  Message as MessageIcon,
   TrendingUp as TrendingIcon,
   Tag as TagIcon,
   People as PeopleIcon,
@@ -117,10 +115,25 @@ const Sidebar: React.FC<SidebarProps> = ({ open = true, onClose }) => {
    */
   const menuItems = [
     {
+      text: 'Home',
+      icon: <HomeIcon />,
+      path: '/home',
+      description: 'Página inicial',
+      disabled: false, // Sempre habilitado
+    },
+    {
+      text: 'Grupos',
+      icon: <GroupIcon />,
+      path: '/groups',
+      description: 'Participar de comunidades temáticas',
+      disabled: false, // Sempre habilitado
+    },
+    {
       text: 'Meu Perfil',
       icon: <PersonIcon />,
-      path: currentUser ? `/profile/${currentUser.username}` : '/login',
+      path: currentUser ? `/profile/${currentUser.username}` : '/login', // Redireciona para login se não estiver logado
       description: 'Visualizar e editar seu perfil',
+      disabled: false, // Sempre habilitado
     },
   ];
 
@@ -137,21 +150,21 @@ const Sidebar: React.FC<SidebarProps> = ({ open = true, onClose }) => {
       icon: <TrendingIcon />,
       path: '/explore?tab=trending',
       description: 'Postagens mais populares',
-      // TODO: Integrar com sistema de trending em tempo real
+      disabled: false, // Sempre habilitado
     },
     {
       text: 'Tags Populares',
       icon: <TagIcon />,
       path: '/explore?tab=tags',
       description: 'Tags mais utilizadas',
-      // TODO: Mostrar tags trending baseadas em algoritmo
+      disabled: false, // Sempre habilitado
     },
     {
       text: 'Novos Usuários',
       icon: <PeopleIcon />,
       path: '/explore?tab=users',
       description: 'Usuários recém-cadastrados',
-      // TODO: Sugerir usuários baseado em interesses similares
+      disabled: false, // Sempre habilitado
     },
   ];
 
@@ -169,16 +182,13 @@ const Sidebar: React.FC<SidebarProps> = ({ open = true, onClose }) => {
    * TODO: Implementar cache de última página visitada
    * TODO: Adicionar animações de transição suaves
    */
-  const handleNavigation = (path: string) => {
-    navigate(path);
-    
-    // Fecha o sidebar no mobile após navegação para melhor UX
-    if (isMobile && onClose) {
-      onClose();
+  const handleNavigation = (path: string | null) => {
+    if (path) {
+      navigate(path);
+      if (isMobile && onClose) {
+        onClose();
+      }
     }
-    
-    // TODO: Registrar evento de navegação para analytics
-    // TODO: Salvar última página visitada no localStorage
   };
 
   /**
@@ -234,10 +244,10 @@ const Sidebar: React.FC<SidebarProps> = ({ open = true, onClose }) => {
             <ListItem key={item.text} disablePadding sx={{ mb: 0.5 }}>
               <ListItemButton
                 onClick={() => handleNavigation(item.path)}
-                selected={isActive(item.path)}
+                selected={item.path ? isActive(item.path) : false} // Verifica se item.path não é null
+                disabled={item.disabled}
                 sx={{
                   borderRadius: 2,
-                  // Estilo para item selecionado/ativo
                   '&.Mui-selected': {
                     backgroundColor: 'primary.light',
                     color: 'primary.contrastText',
@@ -245,28 +255,26 @@ const Sidebar: React.FC<SidebarProps> = ({ open = true, onClose }) => {
                       backgroundColor: 'primary.main',
                     },
                   },
-                  // Estilo para hover em itens não selecionados
                   '&:hover': {
                     backgroundColor: 'action.hover',
                   },
                 }}
                 aria-label={item.description}
               >
-                <ListItemIcon 
-                  sx={{ 
-                    color: isActive(item.path) ? 'inherit' : 'action.active',
+                <ListItemIcon
+                  sx={{
+                    color: item.path && isActive(item.path) ? 'inherit' : 'action.active',
                     minWidth: 40,
                   }}
                 >
                   {item.icon}
                 </ListItemIcon>
-                <ListItemText 
+                <ListItemText
                   primary={item.text}
                   primaryTypographyProps={{
-                    fontWeight: isActive(item.path) ? 600 : 400,
+                    fontWeight: item.path && isActive(item.path) ? 600 : 400, // Verifica se item.path não é null
                   }}
                 />
-                {/* TODO: Adicionar badges de notificação aqui */}
               </ListItemButton>
             </ListItem>
           ))}

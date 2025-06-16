@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Box, Container, Card, Typography, TextField, Button } from '@mui/material';
-import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext'; // Certifique-se de que o AuthContext está implementado
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { login } = useAuth(); // Função de login do AuthContext
   const [form, setForm] = useState({ email: '', senha: '' });
   const [erro, setErro] = useState('');
 
@@ -15,11 +16,11 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await api.post('/auth/login', form);
-      localStorage.setItem('authToken', res.data.token);
-      navigate('/HomePage');  
-    } catch (err: any) {
-      setErro(err.response?.data?.erro || 'Erro ao fazer login');
+      // Certifique-se de que os nomes das propriedades correspondem ao backend
+      await login(form.email, form.senha);
+      navigate('/home'); // Redireciona para a HomePage após o login
+    } catch (err) {
+      setErro('Credenciais inválidas. Tente novamente.');
     }
   };
 

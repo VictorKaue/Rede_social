@@ -1,16 +1,15 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import api from '../services/api';
 
 interface User {
   id: number;
   username: string;
   email: string;
-  profilePhoto?: string;
 }
 
 interface AuthContextData {
   currentUser: User | null;
-  setCurrentUser: React.Dispatch<React.SetStateAction<User | null>>;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -19,32 +18,30 @@ const AuthContext = createContext<AuthContextData | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const token = localStorage.getItem('authToken');
-        if (token) {
-          const response = await api.get('/api/auth/me', {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          setCurrentUser(response.data);
-        }
-      } catch (error) {
-        console.error('Erro ao carregar usuário:', error);
-        setCurrentUser(null);
+  const login = async (email: string, password: string) => {
+    try {
+      console.log('Enviando dados para o backend:', { email, senha: password });
+      const response = await api.post('/auth/login', { email, senha: password });
+      console.log('Resposta do backend:', response.data);
+      setCurrentUser(response.data);
+      localStorage.setItem('authToken', response.data.token);
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error('Erro ao realizar login:', (error as any).response?.data || error.message);
+      } else {
+        console.error('Erro ao realizar login:', error);
       }
-    };
-
-    fetchUser();
-  }, []);
+      throw new Error('Erro ao realizar login');
+    }
+  };
 
   const logout = () => {
-    localStorage.removeItem('authToken');
     setCurrentUser(null);
+    localStorage.removeItem('authToken');
   };
 
   return (
-    <AuthContext.Provider value={{ currentUser, setCurrentUser, logout }}>
+    <AuthContext.Provider value={{ currentUser, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
