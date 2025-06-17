@@ -93,8 +93,7 @@ const HomePage: React.FC = () => {
   const handleLikeComment = async (commentId: number) => {
     try {
       await api.post(`/comments/${commentId}/like`);
-      // Update local state if comments are stored here, else pass handlers down
-      // This is a placeholder for updating comment state
+      console.log(`Comentário ${commentId} curtido!`);
     } catch (error) {
       console.error('Erro ao curtir comentário:', error);
     }
@@ -103,8 +102,7 @@ const HomePage: React.FC = () => {
   const handleDislikeComment = async (commentId: number) => {
     try {
       await api.post(`/comments/${commentId}/dislike`);
-      // Update local state if comments are stored here, else pass handlers down
-      // This is a placeholder for updating comment state
+      console.log(`Comentário ${commentId} descurtido!`);
     } catch (error) {
       console.error('Erro ao descurtir comentário:', error);
     }
@@ -159,12 +157,10 @@ const HomePage: React.FC = () => {
                 <PostCard
                   key={post.post_id}
                   post={post}
-                  setPosts={setPosts} // Passa o setPosts como prop
+                  setPosts={setPosts}
                   onUpdate={handlePostUpdate}
                   onLike={() => handleLike(post.post_id)}
                   onDislike={() => handleDislike(post.post_id)}
-                  onLikeComment={handleLikeComment} // Passa os handlers de comentário
-                  onDislikeComment={handleDislikeComment}
                 />
               ))
             )}
