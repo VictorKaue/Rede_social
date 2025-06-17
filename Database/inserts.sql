@@ -66,3 +66,14 @@ INSERT INTO postagens_grupo (grupo_id, usuario_id, tipo, conteudo, url_midia) VA
 (3, 3, 'imagem', 'Screenshot do jogo', 'screenshot.png'),
 (4, 4, 'texto', 'Recomendo este livro', NULL),
 (5, 5, 'texto', 'Resumo da aula de hoje', NULL);
+
+INSERT INTO reacoes_postagem (usuario_id, postagem_id, tipo) VALUES
+(2, 1, 'curtida'),
+(3, 1, 'curtida'),
+(4, 1, 'descurtida'),
+(5, 2, 'curtida'),
+(6, 3, 'curtida'),
+(7, 3, 'curtida'),
+(8, 3, 'descurtida'),
+(9, 4, 'curtida'),
+(10, 5, 'descurtida');
